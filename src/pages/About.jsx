@@ -2,7 +2,8 @@ import React from 'react';
 
 const About = () => {
   return (
-    <section className="page about">
+    // Add style={{ flex: 1 }} to make it fill the content-container
+    <section className="page about" style={{ flex: 1 }}>
       <h2>About Me</h2>
       <p>
         [Insert Bio Here???] -Lorem ipsum dolor sit amet, consectetur adipiscing elit. 

@@ -9,7 +9,7 @@ const Home = () => {
 
       {/* Navigation / Header */}
       <nav style={{ padding: '20px', background: '#222', color: 'white' }}>
-        <h2>My Portfolio</h2>
+        <h2>Hello World</h2>
       </nav>
 
 
@@ -21,8 +21,7 @@ const Home = () => {
           <h1 style={{ fontSize: '3rem', marginBottom: '10px' }}>Welcome</h1>
           <p style={{ fontSize: '1.2rem', lineHeight: '1.6', color: '#555' }}>
             This is my personal website for the UI Design class. 
-            On the right, you can interact with the 3D statue model. 
-            Try rotating, panning, or zooming to see the details!
+            This is Moe! Nice you to meet you.
           </p>
         </div>
 
