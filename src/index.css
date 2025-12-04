@@ -24,12 +24,10 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  width: 100%; 
   min-width: 320px;
   min-height: 100vh;
 }
-
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
@@ -66,7 +64,12 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
-:root,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 body {
   background-color: #060606;
 }

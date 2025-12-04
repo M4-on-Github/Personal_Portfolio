@@ -1,6 +1,7 @@
 import React from 'react';
 import ThreeCanvas from '../components/ThreeCanvas.jsx';
 import ClickSpark from '../components/ClickSpark.jsx';
+import UnrealStream from '../components/UnrealStream.jsx';
 
 const Home = () => {
   return (
@@ -11,26 +12,9 @@ const Home = () => {
       <nav style={{ padding: '20px', background: '#222', color: 'white' }}>
         <h2>Hello World</h2>
       </nav>
+      <UnrealStream navHeight="80px" />
 
 
-      {/* Main Content Area */}
-      <main style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', height: 'calc(100vh - 80px)' }}>
-        
-        {/* Left Side: Text Content */}
-        <div style={{ flex: 1, minWidth: '300px', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h1 style={{ fontSize: '3rem', marginBottom: '10px' }}>Welcome</h1>
-          <p style={{ fontSize: '1.2rem', lineHeight: '1.6', color: '#555' }}>
-            This is my personal website for the UI Design class. 
-            This is Moe! Nice you to meet you.
-          </p>
-        </div>
-
-        {/* Right Side: The 3D Viewer */}
-        <div style={{ flex: 1, minWidth: '300px', height: '100%' }}>
-          <ThreeCanvas url = "/Statue.stl" />
-        </div>
-
-      </main>
     </div>
     </ClickSpark>
   );
