@@ -1,57 +1,33 @@
-import React from 'react';
+// Projects.jsx
+import React, { useEffect, useState } from 'react';
 import ClickSpark from '../components/ClickSpark.jsx';
 import CircularGallery from '../components/CircularGallery.jsx';
 
 const Projects = () => {
-  // 1. Using 'picsum.photos' because it supports WebGL CORS correctly.
-  // (Placeholder.com often fails in 3D scenes)
-  const projectList = [
-    { 
-      id: 1, 
-      title: "UI Class Project", 
-      image: "https://picsum.photos/id/10/600/400",
-    },
-    { 
-      id: 2, 
-      title: "Web Development", 
-      image: "https://picsum.photos/id/20/600/400",
-    },
-    { 
-      id: 3, 
-      title: "Python Automation", 
-      image: "https://picsum.photos/id/30/600/400",
-    },
-    { 
-      id: 4, 
-      title: "React Experiments", 
-      image: "https://picsum.photos/id/40/600/400",
-    }
-  ];
+  const [galleryItems, setGalleryItems] = useState([]);
 
-  const galleryItems = projectList.map(project => ({
-    image: project.image,
-    text: project.title 
-  }));
+  useEffect(() => {
+    fetch('http://localhost:8000/get_projects.php') // Update with your actual path
+      .then(res => res.json())
+      .then(data => setGalleryItems(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  if (!galleryItems.length) return null;
 
   return (
     <ClickSpark sparkColor="#55ff33ff" sparkSize={8} sparkCount={12} duration={500}>
-      {/* 2. flex: 1 ensures this container takes up available space */}
-      <section style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#111' }}>
-        
-
-        {/* CRITICAL FIX: 
-           We must give this div an explicit height (e.g., 600px or 80vh).
-           If we leave it as 'auto' or just '100%', it often collapses to 0 height.
-        */}
-        <div style={{ height: '600px', width: '100%', position: 'relative' }}>
+      <section style={{ height: '100vh', backgroundColor: '#111', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ height: '100%', width: '100%' }}>
+          {/* We pass specific styling props for the overlay text here */}
           <CircularGallery 
             items={galleryItems}
             bend={2}
-            textColor="#ffffff"
             borderRadius={0.05}
+            font="bold 40px Figtree" 
+            textColor="#ffffff"
           />
         </div>
-
       </section>
     </ClickSpark>
   );

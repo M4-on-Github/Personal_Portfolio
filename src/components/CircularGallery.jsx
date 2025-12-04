@@ -32,26 +32,68 @@ function autoBind(instance) {
   });
 }
 
+/**
+ * Creates a texture containing both Title and Tags.
+ * The Title is drawn at the top, and Tags are drawn below it.
+ */
 function createTextTexture(
   gl,
-  text,
+  title,
+  tags,
   font = "bold 30px monospace",
   color = "black",
 ) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
+
+  // --- 1. Determine Font Sizes ---
+  // Extract pixel size from the font string to calculate tag size
+  const sizeMatch = font.match(/(\d+)px/);
+  const titleSize = sizeMatch ? parseInt(sizeMatch[1], 10) : 30;
+  // Make tags ~60% the size of the title, minimum 12px
+  const tagSize = Math.max(12, Math.floor(titleSize * 0.6));
+  // Create a font string for tags (removing 'bold' to make it lighter)
+  const tagFont = font.replace(/\d+px/, `${tagSize}px`).replace(/bold/i, "normal");
+
+  // --- 2. Measure Title ---
   context.font = font;
-  const metrics = context.measureText(text);
-  const textWidth = Math.ceil(metrics.width);
-  const textHeight = Math.ceil(parseInt(font, 10) * 1.2);
-  canvas.width = textWidth + 20;
-  canvas.height = textHeight + 20;
-  context.font = font;
-  context.fillStyle = color;
-  context.textBaseline = "middle";
-  context.textAlign = "center";
+  const titleMetrics = context.measureText(title);
+  const titleWidth = Math.ceil(titleMetrics.width);
+  const titleHeight = Math.ceil(titleSize * 1.2); // Line height approximation
+
+  // --- 3. Measure Tags ---
+  context.font = tagFont;
+  const tagsMetrics = context.measureText(tags);
+  const tagsWidth = Math.ceil(tagsMetrics.width);
+  const tagsHeight = Math.ceil(tagSize * 1.2);
+
+  // --- 4. Setup Canvas Size ---
+  const padding = 20;
+  const spacing = 10; // Space between title and tags
+  
+  canvas.width = Math.max(titleWidth, tagsWidth) + padding * 2;
+  canvas.height = titleHeight + tagsHeight + spacing + padding * 2;
+
+  // --- 5. Draw Text ---
+  // Clear background (transparent)
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.fillText(text, canvas.width / 2, canvas.height / 2);
+  
+  context.fillStyle = color;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  const centerX = canvas.width / 2;
+  
+  // Draw Title (Top half)
+  context.font = font;
+  const titleY = padding + titleHeight / 2;
+  context.fillText(title, centerX, titleY);
+
+  // Draw Tags (Bottom half)
+  context.font = tagFont;
+  const tagsY = titleY + titleHeight / 2 + spacing + tagsHeight / 2;
+  context.fillText(tags, centerX, tagsY);
+
   const texture = new Texture(gl, { generateMipmaps: false });
   texture.image = canvas;
   return { texture, width: canvas.width, height: canvas.height };
@@ -62,7 +104,8 @@ class Title {
     gl,
     plane,
     renderer,
-    text,
+    title,
+    tags,
     textColor = "#545050",
     font = "30px sans-serif",
   }) {
@@ -70,7 +113,8 @@ class Title {
     this.gl = gl;
     this.plane = plane;
     this.renderer = renderer;
-    this.text = text;
+    this.title = title;
+    this.tags = tags;
     this.textColor = textColor;
     this.font = font;
     this.createMesh();
@@ -78,7 +122,8 @@ class Title {
   createMesh() {
     const { texture, width, height } = createTextTexture(
       this.gl,
-      this.text,
+      this.title,
+      this.tags,
       this.font,
       this.textColor,
     );
@@ -110,9 +155,17 @@ class Title {
     });
     this.mesh = new Mesh(this.gl, { geometry, program });
     const aspect = width / height;
-    const textHeight = this.plane.scale.y * 0.15;
+    
+    // Adjust text height relative to the image plane
+    const textHeight = this.plane.scale.y * 0.25; // Increased slightly to fit both lines
     const textWidth = textHeight * aspect;
+    
     this.mesh.scale.set(textWidth, textHeight, 1);
+    
+    // Position below the image
+    // -this.plane.scale.y * 0.5 (bottom of image)
+    // -textHeight * 0.5 (half of text block height)
+    // -0.05 (margin)
     this.mesh.position.y = -this.plane.scale.y * 0.5 - textHeight * 0.5 - 0.05;
     this.mesh.setParent(this.plane);
   }
@@ -128,7 +181,8 @@ class Media {
     renderer,
     scene,
     screen,
-    text,
+    title, // Changed from text
+    tags,  // Added tags
     viewport,
     bend,
     textColor,
@@ -144,7 +198,8 @@ class Media {
     this.renderer = renderer;
     this.scene = scene;
     this.screen = screen;
-    this.text = text;
+    this.title = title;
+    this.tags = tags;
     this.viewport = viewport;
     this.bend = bend;
     this.textColor = textColor;
@@ -240,13 +295,14 @@ class Media {
     this.plane.setParent(this.scene);
   }
   createTitle() {
-    this.title = new Title({
+    this.titleObj = new Title({
       gl: this.gl,
       plane: this.plane,
       renderer: this.renderer,
-      text: this.text,
+      title: this.title,
+      tags: this.tags,
       textColor: this.textColor,
-      fontFamily: this.font,
+      font: this.font, // Passed as 'font' in Title constructor arguments
     });
   }
   update(scroll, direction) {
@@ -369,54 +425,27 @@ class App {
     });
   }
   createMedias(items, bend = 1, textColor, borderRadius, font) {
+    // Updated default items to match new structure
     const defaultItems = [
       {
         image: `https://picsum.photos/seed/1/800/600?grayscale`,
-        text: "Bridge",
+        title: "Bridge",
+        tags: "#Nature #Arch",
       },
       {
         image: `https://picsum.photos/seed/2/800/600?grayscale`,
-        text: "Desk Setup",
+        title: "Desk Setup",
+        tags: "#Tech #Work",
       },
       {
         image: `https://picsum.photos/seed/3/800/600?grayscale`,
-        text: "Waterfall",
+        title: "Waterfall",
+        tags: "#Nature #Water",
       },
       {
         image: `https://picsum.photos/seed/4/800/600?grayscale`,
-        text: "Strawberries",
-      },
-      {
-        image: `https://picsum.photos/seed/5/800/600?grayscale`,
-        text: "Deep Diving",
-      },
-      {
-        image: `https://picsum.photos/seed/16/800/600?grayscale`,
-        text: "Train Track",
-      },
-      {
-        image: `https://picsum.photos/seed/17/800/600?grayscale`,
-        text: "Santorini",
-      },
-      {
-        image: `https://picsum.photos/seed/8/800/600?grayscale`,
-        text: "Blurry Lights",
-      },
-      {
-        image: `https://picsum.photos/seed/9/800/600?grayscale`,
-        text: "New York",
-      },
-      {
-        image: `https://picsum.photos/seed/10/800/600?grayscale`,
-        text: "Good Boy",
-      },
-      {
-        image: `https://picsum.photos/seed/21/800/600?grayscale`,
-        text: "Coastline",
-      },
-      {
-        image: `https://picsum.photos/seed/12/800/600?grayscale`,
-        text: "Palm Trees",
+        title: "Strawberries",
+        tags: "#Food #Red",
       },
     ];
     const galleryItems = items && items.length ? items : defaultItems;
@@ -431,7 +460,8 @@ class App {
         renderer: this.renderer,
         scene: this.scene,
         screen: this.screen,
-        text: data.text,
+        title: data.title, // Pass title
+        tags: data.tags,   // Pass tags
         viewport: this.viewport,
         bend,
         textColor,

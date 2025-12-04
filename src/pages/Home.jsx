@@ -9,9 +9,8 @@ const Home = () => {
     <div className="home-container" style={{ width: '100%', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
 
       {/* Navigation / Header */}
-      <nav style={{ padding: '20px', background: '#222', color: 'white' }}>
-        <h2>Hello World</h2>
-      </nav>
+      {/* <nav style={{ padding: '20px', background: '#222', color: 'white' }}>
+      </nav> */}
       <UnrealStream navHeight="80px" />
 
 
