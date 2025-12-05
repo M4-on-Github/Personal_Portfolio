@@ -1,1 +1,3 @@
 C:\Program Files\Epic Games\UE_5.0\Samples\PixelStreaming\WebServers\SFU\platform_scripts\cmd
+
+php -S localhost:8000
